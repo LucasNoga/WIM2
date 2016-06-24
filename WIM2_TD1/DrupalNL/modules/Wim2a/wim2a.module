@@ -1,0 +1,134 @@
+<?php
+
+function wim2a_menu(){
+	$items['wim2a/page1/%'] = array(
+		'page callback' => 'wim2a_page1',
+		//'access arguments' => array('access content'),
+		'access callback' => true,
+		'type' => MENU_CALLBACK,
+	);
+
+	$items['wim2a/monformulaire'] = array(
+        'title' => 'Mon Formulaire',
+        'page callback' => 'drupal_get_form',
+        'page arguments' => array('wim2a_monformulaire'),
+        'access callback' => true,
+        'type' => MENU_CALLBACK,
+    );
+
+    $items['wim2a/pageformulaire'] = array(
+        'title' => 'Page Formulaire',
+        'page callback' => 'wim2a_pageformulaire',
+        //'access arguments' => array('access content'),
+        'access callback' => true,
+        'type' => MENU_CALLBACK,
+    );
+	return $items;
+}
+
+function wim2a_page1($arg = 'none'){
+	$outputs['arg'] = $arg;
+	$outputs['request_uri'] = $_SERVER['REQUEST_URI'];
+	$outputs['query_string'] = $_SERVER['QUERY_STRING'];
+	$outputs['path_info'] = isset($_SERVER['PATH_INFO']) ? $_SERVER['PATH_INFO'] : 
+	'non défini';
+	$outputs['script_name'] = $_SERVER['SCRIPT_NAME'];
+	$str = '';
+
+	foreach($outputs as $key => $value) {
+		$str .= $key . '<br>' . $value . '<br><br>'; 
+	}
+	return $str;
+}
+
+function wim2a_pageformulaire(){
+    $form = array();
+    $form_state = array();
+    
+    $page_array['paragraphe1'] = array(
+        '#prefix' => '<p><u>',
+        '#suffix' => '</u></p>',
+        '#markup' => 'Paragraphe avant le formulaire',
+    );
+  
+    $page_array['form'] = drupal_get_form('wim2a_monformulaire');
+    $page_array['paragraphe2'] = array(
+        '#prefix' => '<p>',
+        '#suffix' => '</p>',
+        '#markup' => 'Paragraphe après le formulaire',
+    );
+  
+    return $page_array;
+}
+
+
+function wim2a_monformulaire($form, &$form_state) {
+    $form['nom'] = array( 
+        '#type' => 'textfield', 
+        '#size' =>25 , 
+        '#title' => 'Nom :', 
+        '#name' =>'nom', 
+    ); 
+    $form['prenom'] = array( 
+        '#type' => 'textfield', 
+        '#size' =>25 , 
+        '#title' => 'Prénom :', 
+        '#name' =>'prenom', 
+    );
+    
+    for ($i = 1900; $i<=2015;$i++){
+                $t[]=$i;
+    } 
+    $form['annee'] = array( 
+        '#type' => 'select', 
+        '#title' => 'Annee de naissance :', 
+        '#name' =>'annee', 
+        '#options' => $t, 
+    ); 
+    $form['sexe'] = array( 
+        '#type' => 'radios', 
+        '#title' => 'Sexe:', 
+        '#name' =>'sexe', 
+        '#options' => array('homme'>t('Homme'), 'femme'=>t('Femme')), 
+    ); 
+ 
+    $form['mdp'] = array( 
+        '#type' => 'password_confirm', 
+        '#title' => t(''), 
+        '#name' =>'mdp', 
+    ); 
+    $form['go'] = array( 
+        '#type' => 'submit', 
+        '#value' => 'Valider', 
+    ); 
+    return $form;
+    
+}
+
+function wim2a_monformulaire_validate($form, &$form_state) { 
+    if ($form_state['values']['nom'] == '') { 
+        form_set_error('nom', t('Vous devez saisir un nom.')); 
+    } 
+    if ($form_state['values']['prenom'] == '') { 
+        form_set_error('prenom', t('Vous devez saisir un prénom.')); 
+    } 
+    if ($form_state['values']['sexe'] == NULL){ 
+        form_set_error('sexe', t('Vous devez saisir un sexe.')); 
+    }
+    if ($form_state['values']['mdp'] == ''){ 
+        form_set_error('mdp', t('Vous devez saisir un autre mot de passe.')); 
+    } 
+}
+
+function wim2a_monformulaire_submit($form, &$form_state){ 
+    $data= array( 
+        'nom'=>$form_state['values']['nom'], 
+        'prenom' =>$form_state['values']['prenom'], 
+        'annee' =>$form_state['values']['annee'], 
+        'sexe' =>$form_state['values']['sexe'], 
+        'mdp' =>$form_state['values']['mdp'], 
+    ); 
+    $sql = 'INSERT INTO wim2_etudiant (nom, prenom, annee, sexe, mdp) VALUES (:nom, :prenom, :annee, :sexe, :mdp)'; 
+    db_query($sql, $data); 
+    drupal_set_message('Vos données ont été enregistrées'); 
+}

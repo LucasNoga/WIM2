@@ -1,0 +1,6 @@
+name = wim2a
+description = mon premier module
+core = 7.x
+package = Test
+files[] = wim2a.module
+configure = admin/config/wim2a
